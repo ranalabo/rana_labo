@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANA_LABO 血液検査サプリ提案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #00e5ff;
+    --accent2: #ff6b6b;
+    --accent3: #7bed9f;
+    --text: #e8eaf6;
+    --text-muted: #7986cb;
+    --border: rgba(0,229,255,0.15);
+    --warn: #ffd93d;
+    --crit: #ff4757;
+    --good: #7bed9f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(0,229,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(123,237,159,0.04) 0%, transparent 60%);
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .field-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .field-group:hover { border-color: rgba(0,229,255,0.35); }
+
+  .field-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .field-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field-row input:focus { border-color: var(--accent); }
+
+  .field-row .unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 40px;
+  }
+
+  .ref {
+    font-size: 10px;
+    color: rgba(121,134,203,0.55);
+    margin-top: 4px;
+  }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #0097a7);
+    border: none;
+    border-radius: 8px;
+    color: #0a0e1a;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-bottom: 28px;
+  }
+
+  .analyze-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .analyze-btn:active { transform: translateY(0); }
+
+  #result { display: none; }
+
+  .result-header {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+
+  .supp-card {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent);
+    animation: fadeIn 0.4s ease both;
+  }
+
+  .supp-card.p1 { border-left-color: var(--crit); }
+  .supp-card.p2 { border-left-color: var(--warn); }
+  .supp-card.p3 { border-left-color: var(--accent3); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .supp-rank { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+  .p1 .supp-rank { color: var(--crit); }
+  .p2 .supp-rank { color: var(--warn); }
+  .p3 .supp-rank { color: var(--accent3); }
+
+  .supp-name { font-size: 17px; font-weight: 900; margin-bottom: 6px; }
+  .supp-reason { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 10px; }
+  .supp-dose {
+    font-size: 12px; background: var(--surface2); border-radius: 4px;
+    padding: 6px 10px; display: inline-block;
+    font-family: 'Space Mono', monospace; color: var(--accent); margin-bottom: 10px;
+  }
+
+  .buy-btn {
+    display: inline-block; padding: 7px 14px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-muted);
+    font-size: 12px; text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer; transition: all 0.2s;
+    margin-right: 8px; margin-top: 4px;
+  }
+  .buy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .no-issue {
+    background: var(--surface); border: 1px solid rgba(123,237,159,0.2);
+    border-radius: 8px; padding: 20px; text-align: center;
+    color: var(--accent3); font-size: 13px; line-height: 1.7;
+  }
+
+  .disclaimer {
+    font-size: 11px; color: rgba(121,134,203,0.45);
+    text-align: center; margin-top: 20px; line-height: 1.7;
+  }
+
+  .section-label {
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .disclaimer-top {
+    background: rgba(255,71,87,0.08);
+    border: 1.5px solid rgba(255,71,87,0.35);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+    font-size: 13px;
+    line-height: 1.85;
+    color: #ffb3b3;
+  }
+  .disclaimer-top strong {
+    display: block;
+    font-size: 12px;
+    color: #ff6b6b;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .disclaimer-bottom {
+    font-size: 11px;
+    color: rgba(121,134,203,0.45);
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.9;
+    border-top: 1px solid rgba(0,229,255,0.08);
+    padding-top: 16px;
+  }
+  .brand-footer {
+    text-align: center;
+    margin-top: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: rgba(0,229,255,0.35);
+    letter-spacing: 3px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🧬 RANA_LABO</h1>
+<div class="subtitle">血液検査 × 分子栄養学 サプリ提案システム v1.2</div>
+
+<div class="disclaimer-top">
+  <strong>⚠️ 使用前に必ずお読みください</strong>
+  このツールは分子栄養学・機能医学の考え方をもとにした<strong>参考情報</strong>です。<br>
+  医療機関による診断・治療の代わりにはなりません。<br>
+  数値の解釈・サプリメントの選択・用量については、<strong>必ず医師または専門家に相談</strong>してください。<br>
+  既往症・服薬中の方・妊娠中の方は特にご注意ください。過剰摂取は健康被害の原因になります。
+</div>
+
+<div class="section-label">検査値を入力（わかる項目だけでOK）</div>
+
+<div class="grid">
+  <div class="field-group">
+    <label>フェリチン</label>
+    <div class="field-row">
+      <input type="number" id="ferritin" placeholder="—" step="0.1">
+      <span class="unit">ng/mL</span>
+    </div>
+    <div class="ref">至適: 80〜150</div>
+  </div>
+  <div class="field-group">
+    <label>ヘモグロビン (Hb)</label>
+    <div class="field-row">
+      <input type="number" id="hb" placeholder="—" step="0.1">
+      <span class="unit">g/dL</span>
+    </div>
+    <div class="ref">至適: 13以上</div>
+  </div>
+  <div class="field-group">
+    <label>MCHC</label>
+    <div class="field-row">
+      <input type="number" id="mchc" placeholder="—" step="0.1">
+      <span class="unit">g/dL</span>
+    </div>
+    <div class="ref">至適: 32〜36</div>
+  </div>
+  <div class="field-group">
+    <label>BUN（尿素窒素）</label>
+    <div class="field-row">
+      <input type="number" id="bun" placeholder="—" step="0.1">
+      <span class="unit">mg/dL</span>
+    </div>
+    <div class="ref">至適: 15〜22</div>
+  </div>
+  <div class="field-group">
+    <label>亜鉛 (Zn)</label>
+    <div class="field-row">
+      <input type="number" id="zinc" placeholder="—" step="0.1">
+      <span class="unit">μg/dL</span>
+    </div>
+    <div class="ref">至適: 80〜130</div>
+  </div>
+  <div class="field-group">
+    <label>ビタミンD (25-OH)</label>
+    <div class="field-row">
+      <input type="number" id="vitd" placeholder="—" step="0.1">
+      <span class="unit">ng/mL</span>
+    </div>
+    <div class="ref">至適: 40〜60</div>
+  </div>
+  <div class="field-group">
+    <label>FT4</label>
+    <div class="field-row">
+      <input type="number" id="ft4" placeholder="—" step="0.01">
+      <span class="unit">ng/dL</span>
+    </div>
+    <div class="ref">至適: 1.2〜1.8</div>
+  </div>
+  <div class="field-group">
+    <label>ALP</label>
+    <div class="field-row">
+      <input type="number" id="alp" placeholder="—" step="1">
+      <span class="unit">U/L</span>
+    </div>
+    <div class="ref">至適: 80〜200</div>
+  </div>
+  <div class="field-group">
+    <label>ホモシステイン</label>
+    <div class="field-row">
+      <input type="number" id="homo" placeholder="—" step="0.1">
+      <span class="unit">μmol/L</span>
+    </div>
+    <div class="ref">至適: 10以下</div>
+  </div>
+  <div class="field-group">
+    <label>マグネシウム (Mg)</label>
+    <div class="field-row">
+      <input type="number" id="mg" placeholder="—" step="0.1">
+      <span class="unit">mg/dL</span>
+    </div>
+    <div class="ref">至適: 2.2〜2.6</div>
+  </div>
+  <div class="field-group">
+    <label>葉酸（血清）</label>
+    <div class="field-row">
+      <input type="number" id="folate" placeholder="—" step="0.1">
+      <span class="unit">ng/mL</span>
+    </div>
+    <div class="ref">至適: 6〜20</div>
+  </div>
+  <div class="field-group">
+    <label>ビタミンB2（リボフラビン）</label>
+    <div class="field-row">
+      <input type="number" id="b2" placeholder="—" step="0.1">
+      <span class="unit">ng/mL</span>
+    </div>
+    <div class="ref">至適: 40〜100</div>
+  </div>
+  <div class="field-group">
+    <label>血清鉄 (Fe)</label>
+    <div class="field-row">
+      <input type="number" id="serum_fe" placeholder="—" step="1">
+      <span class="unit">μg/dL</span>
+    </div>
+    <div class="ref">至適: 80〜160</div>
+  </div>
+  <div class="field-group">
+    <label>FT3（遊離T3）</label>
+    <div class="field-row">
+      <input type="number" id="ft3" placeholder="—" step="0.01">
+      <span class="unit">pg/mL</span>
+    </div>
+    <div class="ref">至適: 3.0〜4.5</div>
+  </div>
+  <div class="field-group">
+    <label>TSH</label>
+    <div class="field-row">
+      <input type="number" id="tsh" placeholder="—" step="0.01">
+      <span class="unit">μIU/mL</span>
+    </div>
+    <div class="ref">至適: 1.0〜2.5（機能医学）</div>
+  </div>
+  <div class="field-group">
+    <label>銅 (Cu)</label>
+    <div class="field-row">
+      <input type="number" id="copper" placeholder="—" step="1">
+      <span class="unit">μg/dL</span>
+    </div>
+    <div class="ref">至適: 80〜120</div>
+  </div>
+  <div class="field-group">
+    <label>ビタミンB12（血清）</label>
+    <div class="field-row">
+      <input type="number" id="b12" placeholder="—" step="1">
+      <span class="unit">pg/mL</span>
+    </div>
+    <div class="ref">至適: 500〜900</div>
+  </div>
+  <div class="field-group">
+    <label>ビタミンC（血漿）</label>
+    <div class="field-row">
+      <input type="number" id="vitc" placeholder="—" step="0.1">
+      <span class="unit">mg/dL</span>
+    </div>
+    <div class="ref">至適: 0.8〜1.5</div>
+  </div>
+</div>
+
+<button class="analyze-btn" onclick="analyze()">🔬 解析してサプリ提案を見る</button>
+
+<div id="result"></div>
+
+<div class="disclaimer-bottom">
+  ※ 本ツールは医療診断・処方ではありません。分子栄養学の参考情報として個人の学習目的でご利用ください。<br>
+  数値は検査機関・試薬・測定法により異なります。結果の解釈は必ず主治医・専門医に確認してください。<br>
+  本ツールの使用によって生じたいかなる損害についても、制作者は責任を負いません。
+</div>
+<div class="brand-footer">🐸 RANA_LABO — @rana_labo</div>
+
+<script>
+const DB = {
+  ferritin: {
+    name: "鉄（キレート鉄 / ヘム鉄）",
+    check: v => v < 80,
+    sev: v => v < 20 ? 1 : v < 50 ? 2 : 3,
+    reason: v => `フェリチン ${v} ng/mL は至適値（80〜150）を下回っています。貯蔵鉄不足は疲労・冷え・脱毛・甲状腺機能低下の大きな原因になります。`,
+    dose: "ヘム鉄 or キレート鉄 27〜36mg/日（食後）",
+    links: [
+      { label: "iHerb: NOW キレート鉄", url: "https://www.iherb.com/pr/now-foods-iron-18-mg-120-veg-capsules/756" },
+      { label: "Amazon: ヘム鉄検索", url: "https://www.amazon.co.jp/s?k=%E3%83%98%E3%83%A0%E9%89%84+%E3%82%B5%E3%83%97%E3%83%AA" }
+    ]
+  },
+  hb: {
+    name: "鉄 ＋ ビタミンB群（貧血対策）",
+    check: v => v < 13,
+    sev: v => v < 10 ? 1 : v < 12 ? 2 : 3,
+    reason: v => `Hb ${v} g/dL は低め。鉄欠乏性貧血またはB12・葉酸不足の可能性があります。酸素運搬能の低下は全身のエネルギー産生に影響します。`,
+    dose: "鉄 ＋ メチルB12 1000μg ＋ 葉酸 400〜800μg/日",
+    links: [
+      { label: "iHerb: Jarrow メチルB12", url: "https://www.iherb.com/pr/jarrow-formulas-methyl-b-12-1000-mcg-100-lozenges/4728" }
+    ]
+  },
+  mchc: {
+    name: "鉄 ＋ ビタミンC（吸収促進）",
+    check: v => v < 32,
+    sev: v => v < 30 ? 1 : v < 31 ? 2 : 3,
+    reason: v => `MCHC ${v} g/dL は低値。赤血球内ヘモグロビン濃度の低下は鉄欠乏 or 銅欠乏のサインです。ビタミンCと鉄の同時摂取で吸収率が上がります。`,
+    dose: "鉄（食後）＋ ビタミンC 500〜1000mg（同時）",
+    links: [
+      { label: "iHerb: NOW ビタミンC", url: "https://www.iherb.com/pr/now-foods-vitamin-c-1000-100-tablets/711" }
+    ]
+  },
+  bun: {
+    name: "タンパク質強化 ＋ ビタミンB6",
+    check: v => v < 15,
+    sev: v => v < 10 ? 1 : v < 13 ? 2 : 3,
+    reason: v => `BUN ${v} mg/dL は低め。タンパク質摂取不足 or 消化吸収不良のサインです。ベタインHClを継続しながら動物性タンパクの増量を検討してください。`,
+    dose: "体重×1.5〜2g/日のタンパク質 ＋ B6 50mg/日",
+    links: [
+      { label: "Amazon: 無添加プロテイン検索", url: "https://www.amazon.co.jp/s?k=%E3%83%9B%E3%82%A8%E3%82%A4%E3%83%97%E3%83%AD%E3%83%86%E3%82%A4%E3%83%B3+%E7%84%A1%E6%B7%BB%E5%8A%A0" }
+    ]
+  },
+  zinc: {
+    name: "亜鉛（グリシン酸亜鉛 推奨）",
+    check: v => v < 80,
+    sev: v => v < 60 ? 1 : v < 75 ? 2 : 3,
+    reason: v => `亜鉛 ${v} μg/dL は不足域。腸壁修復・DAO酵素・甲状腺ホルモン活性化・コラーゲン合成に関与。HSD管理にも重要なミネラルです。`,
+    dose: "グリシン酸亜鉛 or ピコリン酸亜鉛 15〜30mg/日（食後）",
+    links: [
+      { label: "iHerb: Thorne 亜鉛ピコリン酸", url: "https://www.iherb.com/pr/thorne-research-zinc-picolinate-15-mg-60-capsules/6937" },
+      { label: "Amazon: 亜鉛サプリ検索", url: "https://www.amazon.co.jp/s?k=%E4%BA%9C%E9%89%9B+%E3%82%B0%E3%83%AA%E3%82%B7%E3%83%B3%E9%85%B8" }
+    ]
+  },
+  vitd: {
+    name: "ビタミンD3（＋K2セット）",
+    check: v => v < 40,
+    sev: v => v < 20 ? 1 : v < 30 ? 2 : 3,
+    reason: v => `ビタミンD ${v} ng/mL は不足。免疫・骨・腸バリア・炎症抑制に幅広く関与。日本人の大半が欠乏しており優先度は高めです。`,
+    dose: "D3 3000〜5000IU ＋ K2（MK-7型）100〜200μg/日 食後",
+    links: [
+      { label: "iHerb: NOW D3+K2", url: "https://www.iherb.com/pr/now-foods-d-3-k-2-1000-iu-45-mcg-120-veg-capsules/63168" },
+      { label: "Amazon: ビタミンD3 K2", url: "https://www.amazon.co.jp/s?k=%E3%83%93%E3%82%BF%E3%83%9FD3+K2+%E3%82%B5%E3%83%97%E3%83%AA" }
+    ]
+  },
+  ft4: {
+    name: "セレン ＋ 亜鉛（甲状腺サポート）",
+    check: v => v < 1.2,
+    sev: v => v < 0.9 ? 1 : v < 1.1 ? 2 : 3,
+    reason: v => `FT4 ${v} ng/dL は低め。甲状腺ホルモン産生にはセレン・亜鉛・ヨウ素が必須です。代謝・体温・疲労感に直結します。`,
+    dose: "セレン 100〜200μg ＋ 亜鉛 15mg/日",
+    links: [
+      { label: "iHerb: NOW セレン", url: "https://www.iherb.com/pr/now-foods-selenium-200-mcg-90-capsules/758" }
+    ]
+  },
+  alp: {
+    name: "亜鉛（ALP低値は欠乏の強いサイン）",
+    check: v => v < 80,
+    sev: v => v < 50 ? 1 : v < 70 ? 2 : 3,
+    reason: v => `ALP ${v} U/L は低値。ALPは亜鉛依存性酵素のため、低値は亜鉛欠乏の強力なマーカーです。腸バリア修復・免疫機能にも影響します。`,
+    dose: "グリシン酸亜鉛 or ピコリン酸亜鉛 15〜30mg/日",
+    links: [
+      { label: "iHerb: Thorne 亜鉛", url: "https://www.iherb.com/pr/thorne-research-zinc-picolinate-15-mg-60-capsules/6937" }
+    ]
+  },
+  homo: {
+    name: "メチル化B群（B12 ＋ 葉酸 ＋ B6）",
+    check: v => v > 10,
+    sev: v => v > 15 ? 1 : v > 12 ? 2 : 3,
+    reason: v => `ホモシステイン ${v} μmol/L は高め。メチル化障害・心血管リスク・認知機能低下と関連します。メチル型B12・メチル葉酸が有効です。`,
+    dose: "メチルB12 1000μg ＋ メチル葉酸 400〜800μg ＋ B6 50mg/日",
+    links: [
+      { label: "iHerb: Jarrow メチルB12", url: "https://www.iherb.com/pr/jarrow-formulas-methyl-b-12-1000-mcg-100-lozenges/4728" }
+    ]
+  },
+  mg: {
+    name: "マグネシウム（グリシン酸Mg）",
+    check: v => v < 2.2,
+    sev: v => v < 1.8 ? 1 : v < 2.1 ? 2 : 3,
+    reason: v => `Mg ${v} mg/dL は低め。マグネシウムは300以上の酵素反応に関与。筋肉・睡眠・エネルギー産生・HSD関節安定性にも重要です。`,
+    dose: "グリシン酸Mg 200〜400mg/日（就寝前推奨）",
+    links: [
+      { label: "iHerb: KAL Mgグリシン酸", url: "https://www.iherb.com/pr/kal-magnesium-glycinate-400-mg-90-tablets/75699" }
+    ]
+  },
+  folate: {
+    name: "葉酸（メチル葉酸 推奨）",
+    check: v => v < 6,
+    sev: v => v < 3 ? 1 : v < 5 ? 2 : 3,
+    reason: v => `葉酸 ${v} ng/mL は不足域。DNA合成・赤血球生成・メチル化サイクルに必須。B12と協調して神経機能・ホモシステイン代謝にも関与します。`,
+    dose: "メチル葉酸（5-MTHF）400〜800μg/日 ※合成葉酸より吸収が良い",
+    links: [
+      { label: "iHerb: Jarrow メチル葉酸", url: "https://www.iherb.com/pr/jarrow-formulas-methyl-folate-400-mcg-60-capsules/10921" },
+      { label: "Amazon: メチル葉酸検索", url: "https://www.amazon.co.jp/s?k=%E3%83%A1%E3%83%81%E3%83%AB%E8%91%89%E9%85%B8+5-MTHF" }
+    ]
+  },
+  b2: {
+    name: "ビタミンB2（リボフラビン）",
+    check: v => v < 40,
+    sev: v => v < 15 ? 1 : v < 30 ? 2 : 3,
+    reason: v => `B2 ${v} ng/mL は低め。ミトコンドリアでのエネルギー産生（FAD/FMN）・脂質代謝・B6活性化に必須。不足すると口内炎・皮膚荒れ・疲労感が出やすくなります。`,
+    dose: "リボフラビン 10〜50mg/日（食後）。活性型R5P（リボフラビン5'-リン酸）が吸収良好",
+    links: [
+      { label: "iHerb: Thorne R5P", url: "https://www.iherb.com/pr/thorne-research-riboflavin-5-phosphate-60-capsules/1181" },
+      { label: "Amazon: B2サプリ検索", url: "https://www.amazon.co.jp/s?k=%E3%83%93%E3%82%BF%E3%83%9FB2+%E3%83%AA%E3%83%9C%E3%83%95%E3%83%A9%E3%83%93%E3%83%B3+%E3%82%B5%E3%83%97%E3%83%AA" }
+    ]
+  },
+  serum_fe: {
+    name: "鉄（血清鉄低値）",
+    check: v => v < 80,
+    sev: v => v < 40 ? 1 : v < 60 ? 2 : 3,
+    reason: v => `血清鉄 ${v} μg/dL は低値。フェリチンと合わせて確認が必要。鉄欠乏は疲労・冷え・脱毛・集中力低下の原因。ビタミンCと一緒に摂取すると吸収率が上がります。`,
+    dose: "ヘム鉄 or キレート鉄 27〜36mg/日（食後）＋ ビタミンC 同時摂取",
+    links: [
+      { label: "iHerb: NOW キレート鉄", url: "https://www.iherb.com/pr/now-foods-iron-18-mg-120-veg-capsules/756" },
+      { label: "Amazon: ヘム鉄検索", url: "https://www.amazon.co.jp/s?k=%E3%83%98%E3%83%A0%E9%89%84+%E3%82%B5%E3%83%97%E3%83%AA" }
+    ]
+  },
+  ft3: {
+    name: "セレン ＋ 亜鉛（FT3低値 = T4→T3変換不全）",
+    check: v => v < 3.0,
+    sev: v => v < 2.0 ? 1 : v < 2.6 ? 2 : 3,
+    reason: v => `FT3 ${v} pg/mL は低め。T4→T3への変換（脱ヨウ素化）にはセレンが必須。FT4が正常でもFT3が低い場合は変換障害のサイン。疲労・冷え・体重増加・うつ様症状に直結します。`,
+    dose: "セレン 100〜200μg/日 ＋ 亜鉛 15〜30mg/日。腸内環境改善も並行して",
+    links: [
+      { label: "iHerb: NOW セレン", url: "https://www.iherb.com/pr/now-foods-selenium-200-mcg-90-capsules/758" },
+      { label: "iHerb: Thorne 亜鉛", url: "https://www.iherb.com/pr/thorne-research-zinc-picolinate-15-mg-60-capsules/6937" }
+    ]
+  },
+  tsh: {
+    name: "甲状腺サポート総合（TSH高値 = 甲状腺機能低下疑い）",
+    check: v => v > 2.5,
+    sev: v => v > 4.5 ? 1 : v > 3.5 ? 2 : 3,
+    reason: v => `TSH ${v} μIU/mL は機能医学的至適値（1.0〜2.5）を超えています。甲状腺が十分に働いていないサインの可能性。セレン・亜鉛・鉄・ビタミンDの不足が背景にあることが多いです。`,
+    dose: "セレン 200μg ＋ 亜鉛 15〜30mg ＋ ビタミンD 3000〜5000IU/日。専門医への相談も推奨",
+    links: [
+      { label: "iHerb: セレン", url: "https://www.iherb.com/pr/now-foods-selenium-200-mcg-90-capsules/758" }
+    ]
+  },
+  copper: {
+    name: "銅（セルロプラスミン）補充",
+    check: v => v < 80,
+    sev: v => v < 50 ? 1 : v < 70 ? 2 : 3,
+    reason: v => `銅 ${v} μg/dL は低値。銅はヘモグロビン合成・鉄の代謝・コラーゲン架橋・ミトコンドリア機能に必須。鉄を補っても銅不足では貧血が改善しないことがあります。`,
+    dose: "銅（グリシン酸銅）1〜2mg/日。亜鉛と拮抗するため亜鉛過多に注意",
+    links: [
+      { label: "iHerb: NOW 銅", url: "https://www.iherb.com/pr/now-foods-copper-3-mg-100-veg-capsules/803" }
+    ]
+  },
+  b12: {
+    name: "ビタミンB12（メチルコバラミン）",
+    check: v => v < 500,
+    sev: v => v < 200 ? 1 : v < 350 ? 2 : 3,
+    reason: v => `B12 ${v} pg/mL は低め。神経機能・DNA合成・メチル化サイクルに必須。葉酸と協調してホモシステイン代謝にも関与。腸内環境が悪いと吸収が低下しやすい栄養素です。`,
+    dose: "メチルコバラミン（舌下錠が吸収良好）1000〜2000μg/日",
+    links: [
+      { label: "iHerb: Jarrow メチルB12", url: "https://www.iherb.com/pr/jarrow-formulas-methyl-b-12-1000-mcg-100-lozenges/4728" },
+      { label: "Amazon: メチルB12検索", url: "https://www.amazon.co.jp/s?k=%E3%83%A1%E3%83%81%E3%83%AB%E3%82%B3%E3%83%90%E3%83%A9%E3%83%9F%E3%83%B3+%E8%88%8C%E4%B8%8B" }
+    ]
+  },
+  vitc: {
+    name: "ビタミンC（アスコルビン酸）",
+    check: v => v < 0.8,
+    sev: v => v < 0.3 ? 1 : v < 0.6 ? 2 : 3,
+    reason: v => `ビタミンC ${v} mg/dL は低め。コラーゲン合成・鉄吸収促進・副腎機能・抗酸化に必須。HSDでは結合組織の維持にビタミンCが特に重要です。`,
+    dose: "アスコルビン酸 or リポソームビタミンC 500〜2000mg/日（分割摂取）",
+    links: [
+      { label: "iHerb: NOW ビタミンC", url: "https://www.iherb.com/pr/now-foods-vitamin-c-1000-100-tablets/711" },
+      { label: "Amazon: リポソームビタミンC", url: "https://www.amazon.co.jp/s?k=%E3%83%AA%E3%83%9D%E3%82%BD%E3%83%BC%E3%83%A0+%E3%83%93%E3%82%BF%E3%83%9FC" }
+    ]
+  }
+};
+
+function analyze() {
+  const keys = ['ferritin','hb','mchc','bun','zinc','vitd','ft4','alp','homo','mg','folate','b2','serum_fe','ft3','tsh','copper','b12','vitc'];
+  const vals = {};
+  let hasAny = false;
+
+  for (const k of keys) {
+    const v = parseFloat(document.getElementById(k).value);
+    if (!isNaN(v)) { vals[k] = v; hasAny = true; }
+  }
+
+  if (!hasAny) { alert('少なくとも1つ数値を入力してください'); return; }
+
+  const issues = [];
+  for (const [k, db] of Object.entries(DB)) {
+    if (vals[k] !== undefined && db.check(vals[k])) {
+      issues.push({ ...db, val: vals[k], prio: db.sev(vals[k]) });
+    }
+  }
+  issues.sort((a,b) => a.prio - b.prio);
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.style.display = 'block';
+
+  if (issues.length === 0) {
+    resultDiv.innerHTML = `
+      <div class="result-header">📊 分析結果</div>
+      <div class="no-issue">✅ 入力した数値の範囲では、明確な不足は検出されませんでした。<br>未入力の項目があれば追加してみてください。</div>
+    `;
+    return;
+  }
+
+  const labels = ['', '🔴 緊急対応', '🟡 優先', '🟢 検討'];
+  let html = `<div class="result-header">📊 分析結果 — ${issues.length}項目の改善候補を検出</div>`;
+
+  issues.forEach((item, i) => {
+    const links = item.links.map(l => `<a class="buy-btn" href="${l.url}" target="_blank">🛒 ${l.label}</a>`).join('');
+    html += `
+      <div class="supp-card p${item.prio}" style="animation-delay:${i*0.08}s">
+        <div class="supp-rank">${labels[item.prio]} — PRIORITY ${item.prio}</div>
+        <div class="supp-name">${item.name}</div>
+        <div class="supp-reason">${item.reason(item.val)}</div>
+        <div class="supp-dose">📋 ${item.dose}</div>
+        <div>${links}</div>
+      </div>
+    `;
+  });
+
+  resultDiv.innerHTML = html;
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
