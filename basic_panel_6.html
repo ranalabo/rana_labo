@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基本パネル — RANA_LABO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+    --accent: #f5c518; --text: #f0f0f0; --text-muted: #888;
+    --border: rgba(245,197,24,0.15); --crit: #ff4757; --warn: #ffd93d; --good: #7bed9f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; padding: 24px 20px; background-image: radial-gradient(ellipse at 50% 0%, rgba(245,197,24,0.05) 0%, transparent 60%); }
+  h1 { font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; }
+  .badge { display: inline-block; font-size: 10px; background: rgba(245,197,24,0.15); color: var(--accent); border: 1px solid rgba(245,197,24,0.3); border-radius: 4px; padding: 2px 8px; letter-spacing: 1px; margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+  .disclaimer-top { background: rgba(255,71,87,0.08); border: 1.5px solid rgba(255,71,87,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 22px; font-size: 13px; line-height: 1.85; color: #ffb3b3; }
+  .disclaimer-top b { display: block; font-size: 12px; color: #ff6b6b; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-bottom: 6px; }
+  .section-label { font-size: 11px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; font-family: 'Space Mono', monospace; margin-bottom: 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .field-group { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; transition: border-color 0.2s; }
+  .field-group:hover { border-color: rgba(245,197,24,0.4); }
+  .field-group label { display: block; font-size: 11px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; font-family: 'Space Mono', monospace; }
+  .field-row { display: flex; align-items: center; gap: 8px; }
+  .field-row input { flex: 1; background: var(--surface2); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; outline: none; transition: border-color 0.2s; width: 100%; }
+  .field-row input:focus { border-color: var(--accent); }
+  .unit { font-size: 11px; color: var(--text-muted); white-space: nowrap; min-width: 40px; }
+  .ref { font-size: 10px; color: rgba(136,136,136,0.55); margin-top: 4px; }
+  .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent), #c9a000); border: none; border-radius: 8px; color: #0f0f0f; font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: opacity 0.2s, transform 0.1s; margin-bottom: 28px; }
+  .analyze-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  #result { display: none; }
+  .result-header { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px; }
+  .card { background: var(--surface); border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 3px solid var(--accent); animation: fadeIn 0.4s ease both; }
+  .card.p1 { border-left-color: var(--crit); } .card.p2 { border-left-color: var(--warn); } .card.p3 { border-left-color: var(--good); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .rank { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+  .p1 .rank { color: var(--crit); } .p2 .rank { color: var(--warn); } .p3 .rank { color: var(--good); }
+  .cname { font-size: 17px; font-weight: 900; margin-bottom: 6px; }
+  .reason { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 10px; }
+  .dose { font-size: 12px; background: var(--surface2); border-radius: 4px; padding: 6px 10px; display: inline-block; font-family: 'Space Mono', monospace; color: var(--accent); margin-bottom: 8px; }
+  .dose-note { display: block; font-size: 10px; color: rgba(255,180,100,0.7); font-family: sans-serif; margin-top: 4px; }
+  .buy-btn { display: inline-block; padding: 7px 14px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 12px; text-decoration: none; font-family: 'Space Mono', monospace; transition: all 0.2s; margin-right: 8px; margin-top: 4px; }
+  .buy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .no-issue { background: var(--surface); border: 1px solid rgba(123,237,159,0.2); border-radius: 8px; padding: 20px; text-align: center; color: var(--good); font-size: 13px; line-height: 1.7; }
+  .disclaimer-bottom { font-size: 11px; color: rgba(136,136,136,0.45); text-align: center; margin-top: 24px; line-height: 1.9; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+  .brand { text-align: center; margin-top: 10px; font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(245,197,24,0.4); letter-spacing: 3px; }
+</style>
+</head>
+<body>
+
+<h1>🩸 基本パネル</h1>
+<div class="subtitle">健診でとれる項目だけで栄養状態を把握する — by RANA_LABO</div>
+<div class="badge">FOR EVERYONE</div>
+
+<div class="disclaimer-top">
+  <b>⚠️ 使用前に必ずお読みください</b>
+  このツールは分子栄養学・機能医学の考え方をもとにした参考情報です。医療機関による診断・治療の代わりにはなりません。数値の解釈・サプリメントの選択・用量については、必ず医師または専門家に相談してください。既往症・服薬中の方・妊娠中の方は特にご注意ください。
+</div>
+
+<div class="section-label">検査値を入力（わかる項目だけでOK）</div>
+
+<div class="grid">
+  <div class="field-group">
+    <label>ヘモグロビン (Hb)</label>
+    <div class="field-row"><input type="number" id="hb" placeholder="—" step="0.1"><span class="unit">g/dL</span></div>
+    <div class="ref">至適: 13以上</div>
+  </div>
+  <div class="field-group">
+    <label>MCV（平均赤血球容積）</label>
+    <div class="field-row"><input type="number" id="mcv" placeholder="—" step="0.1"><span class="unit">fL</span></div>
+    <div class="ref">至適: 85〜100</div>
+  </div>
+  <div class="field-group">
+    <label>赤血球数 (RBC)</label>
+    <div class="field-row"><input type="number" id="rbc" placeholder="—" step="1"><span class="unit">万/μL</span></div>
+    <div class="ref">至適: 女性400〜500</div>
+  </div>
+  <div class="field-group">
+    <label>ヘマトクリット (Ht)</label>
+    <div class="field-row"><input type="number" id="ht" placeholder="—" step="0.1"><span class="unit">%</span></div>
+    <div class="ref">至適: 女性36〜45</div>
+  </div>
+  <div class="field-group">
+    <label>HbA1c</label>
+    <div class="field-row"><input type="number" id="hba1c" placeholder="—" step="0.1"><span class="unit">%</span></div>
+    <div class="ref">至適: 5.6以下</div>
+  </div>
+  <div class="field-group">
+    <label>空腹時血糖</label>
+    <div class="field-row"><input type="number" id="glucose" placeholder="—" step="1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 70〜90</div>
+  </div>
+  <div class="field-group">
+    <label>総コレステロール</label>
+    <div class="field-row"><input type="number" id="tc" placeholder="—" step="1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 160〜220</div>
+  </div>
+  <div class="field-group">
+    <label>LDL コレステロール</label>
+    <div class="field-row"><input type="number" id="ldl" placeholder="—" step="1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 60〜140</div>
+  </div>
+  <div class="field-group">
+    <label>HDL コレステロール</label>
+    <div class="field-row"><input type="number" id="hdl" placeholder="—" step="1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 60以上</div>
+  </div>
+  <div class="field-group">
+    <label>中性脂肪（TG）</label>
+    <div class="field-row"><input type="number" id="tg" placeholder="—" step="1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 50〜100</div>
+  </div>
+  <div class="field-group">
+    <label>γ-GTP</label>
+    <div class="field-row"><input type="number" id="ggt" placeholder="—" step="1"><span class="unit">U/L</span></div>
+    <div class="ref">至適: 女性20以下</div>
+  </div>
+  <div class="field-group">
+    <label>AST（GOT）</label>
+    <div class="field-row"><input type="number" id="ast" placeholder="—" step="1"><span class="unit">U/L</span></div>
+    <div class="ref">至適: 10〜25</div>
+  </div>
+  <div class="field-group">
+    <label>ALT（GPT）</label>
+    <div class="field-row"><input type="number" id="alt" placeholder="—" step="1"><span class="unit">U/L</span></div>
+    <div class="ref">至適: 10〜25</div>
+  </div>
+  <div class="field-group">
+    <label>BUN（尿素窒素）</label>
+    <div class="field-row"><input type="number" id="bun" placeholder="—" step="0.1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 15〜22</div>
+  </div>
+  <div class="field-group">
+    <label>クレアチニン (Cr)</label>
+    <div class="field-row"><input type="number" id="cr" placeholder="—" step="0.01"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 女性0.5〜0.8</div>
+  </div>
+  <div class="field-group">
+    <label>尿酸 (UA)</label>
+    <div class="field-row"><input type="number" id="ua" placeholder="—" step="0.1"><span class="unit">mg/dL</span></div>
+    <div class="ref">至適: 3.0〜6.0</div>
+  </div>
+  <div class="field-group">
+    <label>総タンパク (TP)</label>
+    <div class="field-row"><input type="number" id="tp" placeholder="—" step="0.1"><span class="unit">g/dL</span></div>
+    <div class="ref">至適: 7.0〜8.5</div>
+  </div>
+  <div class="field-group">
+    <label>アルブミン (Alb)</label>
+    <div class="field-row"><input type="number" id="alb" placeholder="—" step="0.1"><span class="unit">g/dL</span></div>
+    <div class="ref">至適: 4.3〜5.0</div>
+  </div>
+  <div class="field-group">
+    <label>TSH</label>
+    <div class="field-row"><input type="number" id="tsh" placeholder="—" step="0.01"><span class="unit">μIU/mL</span></div>
+    <div class="ref">至適: 1.0〜2.5（機能医学）</div>
+  </div>
+</div>
+
+<button class="analyze-btn" onclick="analyze()">🔬 解析してサプリ提案を見る</button>
+<div id="result"></div>
+
+<div class="disclaimer-bottom">
+  ※ 本ツールは医療診断・処方ではありません。分子栄養学の参考情報として個人の学習目的でご利用ください。<br>
+  数値は検査機関・試薬・測定法により異なります。結果の解釈は必ず主治医・専門医に確認してください。<br>
+  本ツールの使用によって生じたいかなる損害についても、制作者は責任を負いません。
+</div>
+<div class="brand">🐸 RANA_LABO — @rana_labo</div>
+
+<script>
+const DB = {
+  hb: {
+    name: "鉄 ＋ ビタミンB群（貧血対策）",
+    check: v => v < 13,
+    sev: v => v < 10 ? 1 : v < 12 ? 2 : 3,
+    reason: v => `Hb ${v} g/dL は低め。鉄欠乏性貧血またはB12・葉酸不足の可能性があります。疲労・冷え・集中力低下の原因になります。`,
+    dose: "鉄 27〜36mg ＋ メチルB12 1000μg ＋ 葉酸 400〜800μg/日",
+    links: [{ label: "iHerb: NOW キレート鉄", url: "https://www.iherb.com/pr/now-foods-iron-18-mg-120-veg-capsules/756" }]
+  },
+  mcv: {
+    name: "鉄 or B12・葉酸（MCV異常）",
+    check: v => v < 85 || v > 100,
+    sev: v => (v < 75 || v > 110) ? 1 : (v < 80 || v > 105) ? 2 : 3,
+    reason: v => v < 85
+      ? `MCV ${v} fL は小球性。鉄欠乏性貧血のサインです。`
+      : `MCV ${v} fL は大球性。B12または葉酸不足のサインです。`,
+    dose: "鉄 27〜36mg/日（小球性）or メチルB12 1000μg ＋ メチル葉酸 400〜800μg/日（大球性）",
+    links: [{ label: "iHerb: Jarrow メチルB12", url: "https://www.iherb.com/pr/jarrow-formulas-methyl-b-12-1000-mcg-100-lozenges/4728" }]
+  },
+  rbc: {
+    name: "鉄 ＋ B12・葉酸（赤血球数低値）",
+    check: v => v < 400,
+    sev: v => v < 350 ? 1 : v < 380 ? 2 : 3,
+    reason: v => `赤血球数 ${v} 万/μL は低め。鉄欠乏・B12不足・葉酸不足のいずれかが原因の可能性があります。Hb・MCVと合わせて確認してください。`,
+    dose: "鉄 27〜36mg ＋ メチルB12 1000μg ＋ メチル葉酸 400〜800μg/日",
+    links: [{ label: "iHerb: NOW キレート鉄", url: "https://www.iherb.com/pr/now-foods-iron-18-mg-120-veg-capsules/756" }]
+  },
+  ht: {
+    name: "鉄 ＋ 水分・電解質（Ht低値）",
+    check: v => v < 36,
+    sev: v => v < 30 ? 1 : v < 33 ? 2 : 3,
+    reason: v => `ヘマトクリット ${v}% は低め。血液中の赤血球の割合が少ない状態。鉄欠乏性貧血の可能性が高く、Hb・フェリチンと合わせた確認が必要です。`,
+    dose: "鉄 27〜36mg/日 ＋ 十分な水分・電解質補給",
+    links: [{ label: "iHerb: NOW キレート鉄", url: "https://www.iherb.com/pr/now-foods-iron-18-mg-120-veg-capsules/756" }]
+  },
+  hba1c: {
+    name: "血糖管理（インスリン抵抗性対策）",
+    check: v => v > 5.6,
+    sev: v => v > 6.4 ? 1 : v > 6.0 ? 2 : 3,
+    reason: v => `HbA1c ${v}% は高め。血糖スパイクが慢性疲労・肥満・炎症の根本原因になります。マグネシウム・クロム・食事改善が有効。`,
+    dose: "マグネシウム 200〜400mg ＋ クロム 200μg/日。糖質の質・量と食べる順番を見直す",
+    links: [{ label: "iHerb: NOW クロム", url: "https://www.iherb.com/pr/now-foods-chromium-picolinate-200-mcg-100-caps/791" }]
+  },
+  glucose: {
+    name: "血糖管理 ＋ マグネシウム",
+    check: v => v > 90,
+    sev: v => v > 126 ? 1 : v > 110 ? 2 : 3,
+    reason: v => `空腹時血糖 ${v} mg/dL は高め。100以上は糖尿病予備軍。インスリン感受性を高めるマグネシウム・クロム・食事改善が優先です。`,
+    dose: "マグネシウム グリシン酸 200〜400mg/日 ＋ クロム 200μg",
+    links: [{ label: "iHerb: KAL Mgグリシン酸", url: "https://www.iherb.com/pr/kal-magnesium-glycinate-400-mg-90-tablets/75699" }]
+  },
+  tc: {
+    name: "コレステロール不足（ホルモン・ビタミンD産生低下）",
+    check: v => v < 160,
+    sev: v => v < 130 ? 1 : v < 150 ? 2 : 3,
+    reason: v => `総コレステロール ${v} mg/dL は低め。コレステロールはホルモン・ビタミンD・胆汁酸の原料。低すぎると代謝・免疫・気分に影響します。`,
+    dose: "動物性脂質（卵・バター・肉類）の意識的な摂取。極端な脂質制限を見直す",
+    links: []
+  },
+  ldl: {
+    name: "LDL管理（オメガ3 ＋ 食事改善）",
+    check: v => v > 140 || v < 60,
+    sev: v => (v > 180 || v < 40) ? 1 : (v > 160 || v < 50) ? 2 : 3,
+    reason: v => v > 140
+      ? `LDL ${v} mg/dL は高め。酸化LDLが動脈硬化の原因に。糖質・トランス脂肪酸の制限とオメガ3補充が有効です。`
+      : `LDL ${v} mg/dL は低め。LDLはホルモン・ビタミンD・胆汁酸の原料。低すぎると代謝・免疫・気分に影響します。`,
+    dose: "EPA/DHA 2000〜4000mg ＋ 糖質・トランス脂肪酸制限（高値）/ 動物性脂質の意識的な摂取（低値）",
+    links: [{ label: "iHerb: NOW オメガ3", url: "https://www.iherb.com/pr/now-foods-ultra-omega-3-180-softgels/9488" }]
+  },
+  hdl: {
+    name: "HDL上昇（運動 ＋ オメガ3）",
+    check: v => v < 60,
+    sev: v => v < 40 ? 1 : v < 50 ? 2 : 3,
+    reason: v => `HDL ${v} mg/dL は低め。HDLは逆コレステロール輸送・抗炎症・心血管保護に関与。運動・オメガ3で改善できます。`,
+    dose: "EPA/DHA 1000〜2000mg/日 ＋ 有酸素運動 週3回以上",
+    links: [{ label: "iHerb: NOW オメガ3", url: "https://www.iherb.com/pr/now-foods-ultra-omega-3-180-softgels/9488" }]
+  },
+  tg: {
+    name: "中性脂肪低下（糖質・アルコール制限）",
+    check: v => v > 100,
+    sev: v => v > 200 ? 1 : v > 150 ? 2 : 3,
+    reason: v => `中性脂肪 ${v} mg/dL は高め。糖質・果糖・アルコールの過剰摂取が主因。炎症・脂肪肝と関連します。`,
+    dose: "糖質制限 ＋ EPA/DHA 2000〜4000mg/日",
+    links: [{ label: "iHerb: オメガ3", url: "https://www.iherb.com/pr/now-foods-ultra-omega-3-180-softgels/9488" }]
+  },
+  ggt: {
+    name: "γ-GTP改善（肝臓・解毒サポート）",
+    check: v => v > 30,
+    sev: v => v > 80 ? 1 : v > 50 ? 2 : 3,
+    reason: v => `γ-GTP ${v} U/L は高め。肝臓の解毒負荷・酸化ストレス・脂肪肝のサイン。グルタチオン産生のためにNAC・ビタミンCが有効です。`,
+    dose: "NAC 600〜1200mg ＋ ビタミンC 1000mg/日",
+    links: [{ label: "iHerb: NOW NAC", url: "https://www.iherb.com/pr/now-foods-nac-600-mg-250-veg-capsules/978" }]
+  },
+  ast: {
+    name: "肝機能サポート（B6 ＋ マグネシウム）",
+    check: v => v > 25,
+    sev: v => v > 50 ? 1 : v > 35 ? 2 : 3,
+    reason: v => `AST ${v} U/L は高め。肝細胞ダメージまたはビタミンB6依存性酵素の亢進。B6 ＋ マグネシウムで酵素機能を整えることが有効です。`,
+    dose: "ビタミンB6（P5P型）50mg ＋ マグネシウム 200〜400mg/日",
+    links: [{ label: "iHerb: Thorne P5P", url: "https://www.iherb.com/pr/thorne-research-pyridoxal-5-phosphate-180-capsules/38384" }]
+  },
+  alt: {
+    name: "肝機能サポート（NAC ＋ ビタミンE）",
+    check: v => v > 25,
+    sev: v => v > 50 ? 1 : v > 35 ? 2 : 3,
+    reason: v => `ALT ${v} U/L は高め。肝臓特異的な炎症・脂肪肝のサイン。抗酸化サポートでダメージを軽減できます。`,
+    dose: "NAC 600mg ＋ ビタミンE（混合トコフェロール）400IU/日",
+    links: [{ label: "iHerb: NOW NAC", url: "https://www.iherb.com/pr/now-foods-nac-600-mg-250-veg-capsules/978" }]
+  },
+  bun: {
+    name: "タンパク質強化 ＋ ビタミンB6",
+    check: v => v < 15,
+    sev: v => v < 10 ? 1 : v < 13 ? 2 : 3,
+    reason: v => `BUN ${v} mg/dL は低め。タンパク質摂取不足 or 消化吸収不良のサインです。`,
+    dose: "体重×1.5〜2g/日の動物性タンパク ＋ B6 50mg/日",
+    links: [{ label: "Amazon: 無添加プロテイン", url: "https://www.amazon.co.jp/s?k=%E3%83%9B%E3%82%A8%E3%82%A4%E3%83%97%E3%83%AD%E3%83%86%E3%82%A4%E3%83%B3+%E7%84%A1%E6%B7%BB%E5%8A%A0" }]
+  },
+  cr: {
+    name: "腎機能サポート（水分 ＋ 抗酸化）",
+    check: v => v > 0.8,
+    sev: v => v > 1.2 ? 1 : v > 1.0 ? 2 : 3,
+    reason: v => `クレアチニン ${v} mg/dL は高め。腎臓のろ過機能低下のサインです。水分補給・抗酸化サポートが基本。サプリの過剰摂取にも注意が必要です。`,
+    dose: "水分 1.5〜2L/日 ＋ 抗酸化（ビタミンC・E）。過剰なタンパク・サプリは控える",
+    links: []
+  },
+  ua: {
+    name: "尿酸コントロール（水分 ＋ ビタミンC）",
+    check: v => v > 6.0,
+    sev: v => v > 8.0 ? 1 : v > 7.0 ? 2 : 3,
+    reason: v => `尿酸 ${v} mg/dL は高め。酸化ストレス・腸内環境悪化のサイン。痛風リスクだけでなく腎機能・血管にも影響します。`,
+    dose: "水分 2L以上/日 ＋ ビタミンC 1000mg ＋ 果糖・アルコール制限",
+    links: [{ label: "iHerb: NOW ビタミンC", url: "https://www.iherb.com/pr/now-foods-vitamin-c-1000-100-tablets/711" }]
+  },
+  tp: {
+    name: "タンパク質 ＋ 消化酵素（総タンパク低値）",
+    check: v => v < 7.0,
+    sev: v => v < 6.0 ? 1 : v < 6.5 ? 2 : 3,
+    reason: v => `総タンパク ${v} g/dL は低め。摂取不足か消化吸収不良。免疫・酵素・ホルモン産生すべてがタンパク質に依存します。`,
+    dose: "動物性タンパク増量 ＋ ベタインHCl（胃酸強化）＋ 消化酵素",
+    links: [{ label: "iHerb: NOW ベタインHCl", url: "https://www.iherb.com/pr/now-foods-betaine-hcl-648-mg-120-veg-capsules/968" }]
+  },
+  alb: {
+    name: "アルブミン改善（タンパク質 ＋ 亜鉛）",
+    check: v => v < 4.3,
+    sev: v => v < 3.5 ? 1 : v < 4.0 ? 2 : 3,
+    reason: v => `アルブミン ${v} g/dL は低め。栄養状態・肝機能・腸バリアの総合指標。低値は炎症・浮腫につながります。`,
+    dose: "動物性タンパク増量 ＋ 亜鉛 15〜30mg ＋ ビタミンC/日",
+    links: [{ label: "iHerb: 亜鉛", url: "https://www.iherb.com/pr/thorne-research-zinc-picolinate-15-mg-60-capsules/6937" }]
+  },
+  tsh: {
+    name: "甲状腺サポート（セレン ＋ 亜鉛）",
+    check: v => v > 2.5,
+    sev: v => v > 4.5 ? 1 : v > 3.5 ? 2 : 3,
+    reason: v => `TSH ${v} μIU/mL は機能医学的至適値（1.0〜2.5）を超えています。甲状腺機能低下の可能性。代謝・体温・エネルギーに影響します。`,
+    dose: "セレン 100〜200μg ＋ 亜鉛 15〜30mg ＋ ビタミンD 3000〜5000IU/日",
+    links: [{ label: "iHerb: NOW セレン", url: "https://www.iherb.com/pr/now-foods-selenium-200-mcg-90-capsules/758" }]
+  }
+};
+
+const KEYS = ['hb','mcv','rbc','ht','hba1c','glucose','tc','ldl','hdl','tg','ggt','ast','alt','bun','cr','ua','tp','alb','tsh'];
+const LABELS = ['', '🔴 緊急対応', '🟡 優先', '🟢 検討'];
+
+function analyze() {
+  const vals = {};
+  let hasAny = false;
+  for (const k of KEYS) {
+    const el = document.getElementById(k);
+    if (el) {
+      const v = parseFloat(el.value);
+      if (!isNaN(v)) { vals[k] = v; hasAny = true; }
+    }
+  }
+  if (!hasAny) { alert('少なくとも1つ数値を入力してください'); return; }
+
+  const issues = [];
+  for (const [k, db] of Object.entries(DB)) {
+    if (vals[k] !== undefined && db.check(vals[k])) {
+      issues.push({ ...db, val: vals[k], prio: db.sev(vals[k]) });
+    }
+  }
+  issues.sort((a,b) => a.prio - b.prio);
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.style.display = 'block';
+
+  if (issues.length === 0) {
+    resultDiv.innerHTML = '<div class="result-header">📊 分析結果</div><div class="no-issue">✅ 入力した数値の範囲では、明確な不足は検出されませんでした。</div>';
+    resultDiv.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  let html = `<div class="result-header">📊 分析結果 — ${issues.length}項目の改善候補を検出</div>`;
+  issues.forEach((item, i) => {
+    const links = item.links.map(l => `<a class="buy-btn" href="${l.url}" target="_blank">🛒 ${l.label}</a>`).join('');
+    html += `
+      <div class="card p${item.prio}" style="animation-delay:${i*0.08}s">
+        <div class="rank">${LABELS[item.prio]} — PRIORITY ${item.prio}</div>
+        <div class="cname">${item.name}</div>
+        <div class="reason">${item.reason(item.val)}</div>
+        <div class="dose">📋 参考範囲：${item.dose}<span class="dose-note">※ 用量は個人差があります。必ず専門家に確認のうえ使用してください</span></div>
+        <div>${links}</div>
+      </div>`;
+  });
+  resultDiv.innerHTML = html;
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
